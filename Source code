@@ -1,0 +1,121 @@
+import java.util.InputMismatchException;
+import java.util.Scanner;
+
+import static java.lang.Thread.sleep;
+
+public class Chess {
+    int     size,               // Переменная хранящая длину одной из сторон доски
+            Cur_pos[]={0,0},    // Переменная хранящая текущую позицию коня
+            trigger=0,          // Переменная хранящая информацию когда циклу алгоритма следует завершится
+            min,                // Переменная хранящая в себе значение клетки с минимальным количество возможных ходов
+            flag,               // Флаговая переменная определяющая является ли элемент для сравнения первым
+            count=1;            // Переменная хранящая значение текущего шага коня
+    public static void main(String[] args) {
+        Chess ob = new Chess();
+        ob.Algorithm();
+    }
+    void Algorithm()
+    {
+        //Диалог
+        Scanner in =new Scanner(System.in);
+        while (true) {
+            try {
+                System.out.println("Введите длину одной стороны доски(от 8 до 76):");
+                size = in.nextInt();
+            }catch (InputMismatchException e){
+                in.next();
+                size = 0;
+            }
+            if (size>=8&&size<=76){
+                break;
+            }else {
+                System.out.println("Была допущена ошибка при вводе");
+
+            }
+
+        }
+        System.out.println("Была построена доска "+size+"х"+size+". Где 0-означает не посещенную клетку, а цифры от 1 до "+size*size+" поля посещенные на определенном шаге\n");
+        while (true) {
+            try {
+                System.out.println("Введите первую координату начальной позиции коня:");
+                Cur_pos[1] = in.nextInt() - 1;
+                System.out.println("Введите вторую координату начальной позиции коня:");
+                Cur_pos[0] = in.nextInt() - 1;
+            }catch (InputMismatchException e){
+                in.next();
+                Cur_pos[0]=Cur_pos[1]=-1;
+            }
+            if(Cur_pos[0]>=0&&Cur_pos[0]<size&&Cur_pos[1]>=0&&Cur_pos[1]<size){
+                break;
+            }else {
+                System.out.println("Была допущена ошибка при вводе");
+            }
+        }
+        System.out.println("Начальная позиция коня: "+(Cur_pos[1]+1)+","+(Cur_pos[0]+1)+"");
+        //Инициализация переменных
+        int horse_moves[][]={ //Максимальное количество возможных перемещений коня
+                {1,2},
+                {-1,2},
+                {1,-2},
+                {-1,-2},
+                {2,1},
+                {-2,1},
+                {2,-1},
+                {-2,-1}};
+        int Board[][]=new int[size][size]; // Массив хранящий доску со всеми перемещениями коня по ней
+        int Pos_move[][]=new int[size][size]; //Массив хранящий доску с информациях про возможное количество ходов из каждой клетки
+
+        //Создания доски с количеством шагов для каждой клетки
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                for (int k = 0; k < horse_moves.length; k++) {
+                    if(i+horse_moves[k][0]>=0&&i+horse_moves[k][0]<size&&j+horse_moves[k][1]>=0&&j+horse_moves[k][1]<size){
+                        Pos_move[i][j]++;
+                    }
+                }
+            }
+        }
+        //Алгоритм обхода конем доски
+        while(trigger!=size*size){
+            trigger++;
+            Pos_move[Cur_pos[0]][Cur_pos[1]]=0;
+            Board[Cur_pos[0]][Cur_pos[1]]=count++;
+            final int Prev_pos[] = {Cur_pos[0],Cur_pos[1]}; // Переменная предыдущей позиции коня
+            flag=0;
+            for (int k = 0; k < horse_moves.length; k++) {
+                if (Prev_pos[0] + horse_moves[k][0] >= 0 && Prev_pos[0] + horse_moves[k][0] < size && Prev_pos[1] + horse_moves[k][1] >= 0 && Prev_pos[1] + horse_moves[k][1] < size) {
+                    if(flag==0&&Pos_move[Prev_pos[0] + horse_moves[k][0]][Prev_pos[1] + horse_moves[k][1]]!=0){
+                        min=Pos_move[Prev_pos[0] + horse_moves[k][0]][Prev_pos[1] + horse_moves[k][1]];
+                        Cur_pos[0]=(Prev_pos[0] + horse_moves[k][0]);
+                        Cur_pos[1]=(Prev_pos[1] + horse_moves[k][1]);
+                        flag=1;
+
+
+                    }else if(Pos_move[Prev_pos[0] + horse_moves[k][0]][Prev_pos[1] + horse_moves[k][1]]<min&&Pos_move[Prev_pos[0] + horse_moves[k][0]][Prev_pos[1] + horse_moves[k][1]]!=0){
+                        min=Pos_move[Prev_pos[0] + horse_moves[k][0]][Prev_pos[1] + horse_moves[k][1]];
+                        Cur_pos[0]=(Prev_pos[0] + horse_moves[k][0]);
+                        Cur_pos[1]=(Prev_pos[1] + horse_moves[k][1]);
+                    }
+                    if(Pos_move[Prev_pos[0] + horse_moves[k][0]][Prev_pos[1] + horse_moves[k][1]]!=0)
+                    Pos_move[Prev_pos[0] + horse_moves[k][0]][Prev_pos[1] + horse_moves[k][1]]--;
+                }
+            }
+            //Задержка при выводе результатов
+            try{
+                sleep(500);
+            }catch (InterruptedException e){
+
+            }
+            //Вывод результатов
+            System.out.println();
+            for (int i = 0; i < size; i++) {
+                for (int j = 0; j < size; j++) {
+                    System.out.print(Board[i][j]+"\t");
+                }
+                System.out.println();
+            }
+
+        }
+
+    }
+}
